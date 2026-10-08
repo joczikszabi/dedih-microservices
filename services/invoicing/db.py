@@ -32,7 +32,7 @@ class Invoice(Base):
 
 
 def wait_and_init() -> None:
-    for attempt in range(1, 31):
+    for attempt in range(1, 91):
         try:
             Base.metadata.create_all(engine)
             return

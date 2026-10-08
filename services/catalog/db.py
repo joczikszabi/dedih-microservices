@@ -64,7 +64,7 @@ def seed(session: Session) -> None:
 
 def wait_and_init() -> None:
     """Wait for Postgres, create the tables and seed them. Called at startup."""
-    for attempt in range(1, 31):
+    for attempt in range(1, 91):
         try:
             Base.metadata.create_all(engine)
             with Session(engine) as session:

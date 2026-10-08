@@ -66,6 +66,14 @@ spec:
             preStop:
               exec:
                 command: ["sleep", "5"]
+          # Startup waits for Postgres, which can take a while on a busy
+          # machine. Until /health answers once, liveness does not count.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 2
+            failureThreshold: 90
           readinessProbe:
             httpGet:
               path: /health

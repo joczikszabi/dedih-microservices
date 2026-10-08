@@ -709,11 +709,11 @@ Az első terminálban:
 scripts/bot.sh 6000
 ```
 
-Ez körülbelül két percig fut. Nézd a Grafana-t: a **Responses at the gateway**
+Ez egy-két percig fut (a teszt gépen 70 másodperc volt). Nézd a Grafana-t: a **Responses at the gateway**
 panelen a `429`-es vonal felugrik, a normál `200` mellette alig mozdul.
 
 Nézd a Prometheus **Alerts** oldalát. A `ShopRequestFlood` szabály előbb
-**Pending**, aztán körülbelül egy perc múlva **Firing**. A szabály a
+**Pending**, aztán a bot indítása után körülbelül egy perccel **Firing**. A szabály a
 `mesh/addons/prometheus.yaml` fájlban van, olvasható.
 
 ### 5.4 Ha egy partner kiesik (opcionális)
