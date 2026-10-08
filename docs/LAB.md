@@ -104,7 +104,7 @@ istioctl version --remote=false
 
 ---
 
-## 1. Blokk: minden ajtó nyitva
+## 1. Blokk: a webshop gateway nélkül
 
 ### 1.1 Indítsd el
 
@@ -137,7 +137,7 @@ kattints a földgömb ikonra.
 3. Tegyél valamit a kosárba, és rendeld meg.
 4. **My orders**: itt látod a rendelésedet.
 
-### 1.3 Minden service-nek saját ajtaja van
+### 1.3 Minden service elérhető kívülről
 
 A shop a 8080-as porton fut. A **PORTS** fülön viszont más portok is vannak:
 
@@ -175,7 +175,7 @@ curl -s -X POST localhost:8003/api/payments/refunds \
 Semmit nem kérdezett, egyszerűen végrehajtotta. A `requested_by` mező szerint
 azt sem tudja, ki kérte. Erre a 4. blokkban visszatérünk.
 
-Minden service, amit külön elindítasz, egy újabb ajtó a rendszeren.
+Minden külön elindított service egy újabb végpont, amit kívülről el lehet érni.
 
 ---
 
