@@ -1,0 +1,31 @@
+# How scripts/mesh-up.sh installs Istio: `istioctl install -f mesh/istio-install.yaml`
+#
+# Sidecar mode, "minimal" profile: only istiod, the control plane. No
+# ingress gateway, because Nginx already is our way in.
+#
+# Resource requests are lowered so the whole lab fits a 4 core / 16 GB
+# Codespace. The defaults are sized for production clusters (istiod asks for
+# 500m CPU and 2 GB memory, every sidecar for 100m CPU).
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  profile: minimal
+  components:
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+  values:
+    pilot:
+      autoscaleEnabled: false
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 48Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi

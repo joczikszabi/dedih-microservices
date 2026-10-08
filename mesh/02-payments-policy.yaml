@@ -1,0 +1,38 @@
+# Block 4, step 4: who may call payments and invoicing.
+#
+# mTLS (step 3) proves WHO is calling. This decides WHAT they may do.
+# Only the orders workload, identified by its ServiceAccount, may call
+# payments and invoicing. Anyone else, the catalog pod included, gets
+# "RBAC: access denied" from the sidecar, and the request never reaches the
+# application.
+#
+# An ALLOW policy on a workload means: everything not listed is denied.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: payments-only-from-orders
+  namespace: shop
+spec:
+  selector:
+    matchLabels:
+      app: payments
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/shop/sa/orders"]
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: invoicing-only-from-orders
+  namespace: shop
+spec:
+  selector:
+    matchLabels:
+      app: invoicing
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/shop/sa/orders"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Normal customers: a gentle, steady background of browsing, so the graphs in
-# block 5 have something to compare the bot against. About one request per
+# block 5 have something to compare the bot against. About three requests per
 # second. Stop it with Ctrl+C.
 #
 #   scripts/traffic.sh
@@ -15,7 +15,7 @@ TOKEN=$(curl -s "$SHOP_URL/api/orders/auth/login" \
   -d '{"email":"alice@example.com","password":"alice123"}' \
   | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
 
-echo "Normal traffic against $SHOP_URL, about one request per second. Ctrl+C to stop."
+echo "Normal traffic against $SHOP_URL, about three requests per second. Ctrl+C to stop."
 n=0
 while true; do
   n=$((n + 1))

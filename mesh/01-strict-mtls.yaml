@@ -1,0 +1,33 @@
+# Block 4, step 3: STRICT mTLS in the namespace "shop".
+#
+# From now on a pod in "shop" only accepts connections that come with a
+# valid mesh certificate. A pod without a sidecar has no certificate, so it
+# is refused before the application ever sees the request.
+#
+# What this does NOT do: decide who may call whom. Every pod with a sidecar
+# has a valid certificate, the "compromised" catalog included. That is
+# step 4.
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: shop
+spec:
+  mtls:
+    mode: STRICT
+---
+# One exception: Nginx is the front door. Browsers and curl come from
+# outside the mesh, without a mesh certificate, so Nginx must keep accepting
+# plain connections on its own port. Behind Nginx everything is mTLS.
+# (In a cluster with an Istio ingress gateway, the gateway plays this role.)
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: nginx-front-door
+  namespace: shop
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  mtls:
+    mode: PERMISSIVE
