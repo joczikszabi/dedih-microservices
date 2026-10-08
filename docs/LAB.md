@@ -83,7 +83,7 @@ találod.
    **Create codespace**.
 4. Az első indítás kb. öt perc.
 
-> A délutáni Istio és monitoring miatt kell a 4 mag és a 16 GB memória. A repó
+> A délutáni Istio és monitoring miatt 4 magos gép kell. A repó
 > ezt magától is kéri. Ha mégis kisebb gépet kaptál, töröld a Codespace-t, és
 > hozd létre újra 4-core beállítással.
 
