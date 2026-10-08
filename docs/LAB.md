@@ -446,8 +446,9 @@ Nyisd meg újra a shopot a 8080-as porton. Ugyanaz a shop, ugyanazzal a
 `gateway.conf` fájllal, csak most Kubernetesen fut. Az oldal alján a
 `catalog served by` sorban most egy pod neve áll.
 
-Nézz bele egy manifestbe, például a `k8s/orders.yaml` fájlba. Az `orders` a
-többi service-t a nevén éri el, például `http://catalog:8000`. A nevet a
+Nézz bele egy manifestbe, például a `k8s/orders.yaml` fájlba. A környezeti
+változók ugyanazok, mint a `compose.yaml` fájlban. Az `orders` a többi
+service-t a nevén éri el, például `http://catalog:8000`. A nevet a
 Kubernetes DNS oldja fel. Minden service-nek saját ServiceAccountja van, ez a
 4. blokkban lesz fontos.
 
@@ -566,7 +567,7 @@ kubectl rollout restart deployment -n shop
 kubectl get pods -n shop
 ```
 
-Kb. fél perc múlva:
+Kb. másfél perc múlva, amikor minden pod újraindult:
 
 ```
 NAME                            READY   STATUS    RESTARTS   AGE
@@ -723,12 +724,12 @@ Az első terminálban:
 scripts/bot.sh 6000
 ```
 
-Ez kb. egy percig fut (a teszt gépen 70 másodpercig). Nézd a Grafanát: a
+Ez néhány percig fut (a teszt gépen 70 és 200 másodperc között). Nézd a Grafanát: a
 **Responses at the gateway** panelen a `429` vonala felugrik, a normál `200`
 mellette alig mozdul.
 
 Nézd meg a Prometheus **Alerts** oldalát is. A `ShopRequestFlood` szabály
-előbb **Pending** állapotba kerül, majd kb. egy perccel a bot indítása után
+előbb **Pending** állapotba kerül, majd a bot indítása után kb. másfél perccel
 **Firing** lesz. A szabályt a `mesh/addons/prometheus.yaml` fájlban találod.
 
 ### 5.4 Ha egy partner kiesik (opcionális)

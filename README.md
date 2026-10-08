@@ -91,10 +91,9 @@ docs/LAB.md        the participant guide, Hungarian
 | `scripts/cluster-up.sh`, node image cached | 72 s |
 | `scripts/mesh-up.sh`, images not cached | 273 s |
 | kind node memory, shop only | 1.5 GB |
-| kind node memory, shop + Istio + Prometheus, Grafana, Kiali, all sidecars | 3.1 GB |
-| Sum of CPU requests in the cluster, mesh included | 1410m |
-| Alert `ShopRequestFlood`: bot start to firing | about 60 s |
-| Rolling update of catalog, 3 replicas, requests during it | 80 of 80 answered 200 |
+| kind node memory, shop + Istio + Prometheus, Grafana, Kiali, all sidecars | 2.3 to 3.1 GB |
+| Alert `ShopRequestFlood`: bot start to firing | 60 to 82 s |
+| Rolling update of catalog, 3 replicas | 35 s, 200 of 200 requests answered 200 |
 
 A 4 core / 16 GB Codespace has room for this. It has not yet been measured in
 a Codespace itself.
@@ -119,8 +118,11 @@ a Codespace itself.
   testing (measured: 0, 2, 4, 5, 8 to 17 s). Connections already open between
   sidecars keep the old rules until Envoy drains them. If the attack still
   succeeds right after `kubectl apply`, wait and run it again.
-- The services' startup waits for Postgres. Startup probes keep liveness from
-  restarting a pod that is only waiting (seen once in a devcontainer run).
+- The manifests in `k8s/` are kept minimal on purpose: no liveness or startup
+  probes, no securityContext, no resource requests or limits, and the
+  connection strings sit in plain env values that mirror `compose.yaml`
+  (no Secret). The services wait for Postgres in their own code, and a
+  readiness probe keeps a pod out of the Service until it answers.
 - The Compose files have no healthchecks. Each service retries the database
   connection for up to three minutes on startup and has `restart: on-failure`.
   Right after `docker compose up` the shop answers 502 for about five seconds
