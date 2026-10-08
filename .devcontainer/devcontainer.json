@@ -3,13 +3,6 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  // Istio, Prometheus, Grafana and Kiali next to the shop need more CPU than the
-  // default 2 core machine. Memory is not the limit: the whole cluster uses about
-  // 3 GB, so 8 GB is enough. In Codespaces "cpus": 4 selects the 4 core machine.
-  "hostRequirements": {
-    "cpus": 4,
-    "memory": "8gb"
-  },
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:4": {},
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {

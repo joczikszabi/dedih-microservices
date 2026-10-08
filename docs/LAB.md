@@ -83,9 +83,13 @@ találod.
    **Create codespace**.
 4. Az első indítás kb. öt perc.
 
-> A délutáni Istio és monitoring miatt 4 magos gép kell. A repó
-> ezt magától is kéri. Ha mégis kisebb gépet kaptál, töröld a Codespace-t, és
-> hozd létre újra 4-core beállítással.
+> **Gépigény:** legalább 4 CPU mag és 8 GB memória. A teljes cluster az Istióval
+> és a monitoringgal együtt kb. 3 GB memóriát használ, a CPU a szűkebb keresztmetszet.
+>
+> - **Codespaces:** a **4-core** gép (16 GB) az ajánlott. A 2-core gépen a délutáni
+>   Istio és monitoring nincs kipróbálva.
+> - **Saját gépen:** Docker Desktopban legalább 4 CPU és 8 GB memória legyen
+>   beállítva (Settings, Resources).
 
 Ha elindult, ellenőrizd a terminálban:
 
