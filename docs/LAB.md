@@ -657,7 +657,8 @@ scripts/attack-from-catalog.sh
 ```
 
 > Ha még `200`-at kapsz, várj még tíz másodpercet, és futtasd újra. A szabálynak
-> el kell jutnia minden sidecar-hoz.
+> el kell jutnia a sidecar-okhoz, és a már nyitott kapcsolatok egy ideig még a
+> régi szabállyal mennek. A teszteken ez 0 és kb. 20 másodperc között volt.
 
 A shop közben működik: rendelj valamit a böngészőben. Az `orders` hívhatja a
 `payments`-t, mert ő az `orders`.

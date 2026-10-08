@@ -111,9 +111,12 @@ a Codespace itself.
 - Postgres is a StatefulSet outside the mesh, so that
   `kubectl rollout restart deployment -n shop` in block 4 does not wipe the
   data.
-- An AuthorizationPolicy took between 2 and about 15 seconds to take effect in
-  testing. If the attack still succeeds right after `kubectl apply`, wait and
-  run it again.
+- An AuthorizationPolicy took between 0 and about 20 seconds to take effect in
+  testing (measured: 0, 2, 4, 5, 8 to 17 s). Connections already open between
+  sidecars keep the old rules until Envoy drains them. If the attack still
+  succeeds right after `kubectl apply`, wait and run it again.
+- The services' startup waits for Postgres. Startup probes keep liveness from
+  restarting a pod that is only waiting (seen once in a devcontainer run).
 - Nginx resolves service names once, at start. If a rebuilt Compose service
   ever gives 502, `docker compose restart nginx`.
 - The rate limit is per token, not per IP: in a Codespace every request comes
