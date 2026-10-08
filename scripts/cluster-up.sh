@@ -31,6 +31,8 @@ else
   echo "==> Cluster \"$CLUSTER\" already exists, reusing it"
 fi
 
+# Compose tags its images retro-shop/<name>:v1 as well, so after the Compose
+# blocks these builds come straight from the cache.
 echo "==> Building the images (fast if Compose already built them)"
 for name in $IMAGES; do
   docker build -q -t "retro-shop/$name:v1" "services/$name" >/dev/null
