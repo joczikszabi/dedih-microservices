@@ -1,4 +1,4 @@
-# web: the shop's static pages (Astro build), served by unprivileged Nginx.
+# web: the shop's static pages, served by unprivileged Nginx.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -24,10 +24,7 @@ spec:
       containers:
         - name: web
           image: retro-shop/web:v1
-          imagePullPolicy: Never
-          securityContext:
-            runAsNonRoot: true
-            allowPrivilegeEscalation: false
+          imagePullPolicy: Never  # loaded with `kind load`, there is no registry
           ports:
             - containerPort: 8080
               name: http
@@ -35,13 +32,6 @@ spec:
             httpGet:
               path: /
               port: 8080
-            periodSeconds: 5
-          resources:
-            requests:
-              cpu: 10m
-              memory: 16Mi
-            limits:
-              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -52,6 +42,6 @@ spec:
   selector:
     app: web
   ports:
-    - name: http
+    - name: http  # tells Istio this is HTTP traffic
       port: 8080
       targetPort: 8080

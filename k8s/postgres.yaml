@@ -1,14 +1,8 @@
-# One Postgres server, one database and one user per service (db/init.sql,
-# loaded into the ConfigMap "db-init" by scripts/cluster-up.sh).
-#
-# A StatefulSet rather than a Deployment, for one practical reason: block 4
-# runs `kubectl rollout restart deployment -n shop`, and that must not
-# restart the database (the data lives in an emptyDir and would be lost).
-#
-# The database also stays outside the mesh (no sidecar, see the label). The
-# services' sidecars notice that and talk to it in plain TCP. Many real
-# setups do the same with databases; the AuthorizationPolicy in block 4
-# protects payments and invoicing, not this.
+# One Postgres server with one database and one user per service (db/init.sql,
+# loaded into the ConfigMap "db-init" by cluster-up.sh).
+# A StatefulSet, so `kubectl rollout restart deployment` in block 4 leaves it
+# alone: the data is in an emptyDir and a restart would lose it.
+# It stays outside the mesh (no sidecar).
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -36,16 +30,12 @@ spec:
       containers:
         - name: postgres
           image: postgres:17-alpine
-          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
               name: tcp-postgres
           env:
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: shop-secrets
-                  key: POSTGRES_PASSWORD
+              value: postgrespw
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           volumeMounts:
@@ -56,15 +46,7 @@ spec:
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "postgres"]
-            periodSeconds: 3
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              memory: 384Mi
       volumes:
-        # emptyDir lives and dies with the pod. Fine for a lab.
         - name: data
           emptyDir: {}
         - name: init

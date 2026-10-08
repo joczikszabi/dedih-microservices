@@ -1,9 +1,5 @@
-# nginx: the gateway, the only way in from outside.
-#
-# The same nginx/gateway.conf as compose.nginx.yaml uses, here as a ConfigMap
-# ("nginx-gateway", created from the file by scripts/cluster-up.sh).
-# Nginx finds the services by name (web, catalog, orders), exactly as in
-# Compose: the Kubernetes Service names are the same.
+# nginx: the gateway, the only way in from outside. Its configuration is
+# nginx/gateway.conf, loaded into the ConfigMap "nginx-gateway" by cluster-up.sh.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -29,7 +25,6 @@ spec:
       containers:
         - name: nginx
           image: nginx:1.30-alpine
-          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http
@@ -40,21 +35,12 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 8080
-            periodSeconds: 3
-          resources:
-            requests:
-              cpu: 25m
-              memory: 32Mi
-            limits:
-              memory: 128Mi
       volumes:
         - name: config
           configMap:
             name: nginx-gateway
 ---
-# NodePort 30080 is mapped to port 8080 of the Codespace by kind/kind-config.yaml.
-# Every request opens a new connection to the Service, so with three catalog
-# pods you really see three different "served by" names.
+# NodePort 30080 is mapped to port 8080 by kind/kind-config.yaml.
 apiVersion: v1
 kind: Service
 metadata:
@@ -65,7 +51,7 @@ spec:
   selector:
     app: nginx
   ports:
-    - name: http
+    - name: http  # tells Istio this is HTTP traffic
       port: 8080
       targetPort: 8080
       nodePort: 30080
