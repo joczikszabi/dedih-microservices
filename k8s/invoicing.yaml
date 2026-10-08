@@ -1,0 +1,90 @@
+# invoicing: invoices, sent on to the external system. Internal.
+#
+# Its own ServiceAccount: in block 4 this becomes the workload identity,
+# spiffe://cluster.local/ns/shop/sa/invoicing
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: invoicing
+  namespace: shop
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoicing
+  namespace: shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoicing
+  template:
+    metadata:
+      labels:
+        app: invoicing
+    spec:
+      serviceAccountName: invoicing
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: invoicing
+          image: retro-shop/invoicing:v1
+          # Loaded with `kind load docker-image`, there is no registry.
+          imagePullPolicy: Never
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shop-secrets
+                  key: INVOICING_DATABASE_URL
+            - name: EINVOICE_URL
+              value: http://einvoice-mock:8000
+          # On shutdown, keep serving for 5 more seconds while Kubernetes
+          # takes this pod out of the Service. Without it a rolling update
+          # drops the odd request (we saw exactly one 502 in testing).
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoicing
+  namespace: shop
+spec:
+  selector:
+    app: invoicing
+  ports:
+    # The name "http" tells Istio this is HTTP traffic, so it can apply HTTP
+    # level rules and answer "RBAC: access denied" instead of cutting the line.
+    - name: http
+      port: 8000
+      targetPort: 8000

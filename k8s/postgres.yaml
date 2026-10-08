@@ -1,0 +1,85 @@
+# One Postgres server, one database and one user per service (db/init.sql,
+# loaded into the ConfigMap "db-init" by scripts/cluster-up.sh).
+#
+# A StatefulSet rather than a Deployment, for one practical reason: block 4
+# runs `kubectl rollout restart deployment -n shop`, and that must not
+# restart the database (the data lives in an emptyDir and would be lost).
+#
+# The database also stays outside the mesh (no sidecar, see the label). The
+# services' sidecars notice that and talk to it in plain TCP. Many real
+# setups do the same with databases; the AuthorizationPolicy in block 4
+# protects payments and invoicing, not this.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres
+  namespace: shop
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: shop
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: postgres
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: tcp-postgres
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shop-secrets
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            periodSeconds: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 384Mi
+      volumes:
+        # emptyDir lives and dies with the pod. Fine for a lab.
+        - name: data
+          emptyDir: {}
+        - name: init
+          configMap:
+            name: db-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: shop
+spec:
+  selector:
+    app: postgres
+  ports:
+    - name: tcp-postgres
+      port: 5432
+      targetPort: 5432

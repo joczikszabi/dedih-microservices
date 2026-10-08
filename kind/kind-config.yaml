@@ -1,0 +1,14 @@
+# One node, with host port 8080 mapped to the Nginx NodePort on 30080.
+#
+# A NodePort rather than `kubectl port-forward`, because port-forward pins one
+# pod and would hide the load balancing across catalog replicas in block 3.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+# Without this the cluster is called "kind" and every --name dedih fails.
+name: dedih
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        protocol: TCP

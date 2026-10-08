@@ -1,0 +1,83 @@
+# einvoice-mock: stands in for an external invoicing system. Block 5
+# scales it to 0 to simulate a partner outage.
+#
+# Its own ServiceAccount: in block 4 this becomes the workload identity,
+# spiffe://cluster.local/ns/shop/sa/einvoice-mock
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: einvoice-mock
+  namespace: shop
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: einvoice-mock
+  namespace: shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: einvoice-mock
+  template:
+    metadata:
+      labels:
+        app: einvoice-mock
+    spec:
+      serviceAccountName: einvoice-mock
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: einvoice-mock
+          image: retro-shop/einvoice-mock:v1
+          # Loaded with `kind load docker-image`, there is no registry.
+          imagePullPolicy: Never
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 8000
+              name: http
+          # On shutdown, keep serving for 5 more seconds while Kubernetes
+          # takes this pod out of the Service. Without it a rolling update
+          # drops the odd request (we saw exactly one 502 in testing).
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: einvoice-mock
+  namespace: shop
+spec:
+  selector:
+    app: einvoice-mock
+  ports:
+    # The name "http" tells Istio this is HTTP traffic, so it can apply HTTP
+    # level rules and answer "RBAC: access denied" instead of cutting the line.
+    - name: http
+      port: 8000
+      targetPort: 8000

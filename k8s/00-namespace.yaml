@@ -1,0 +1,8 @@
+# Everything of the shop lives in the namespace "shop".
+#
+# Note: no istio-injection label here. Block 4 adds it by hand, so that the
+# moment the sidecars arrive is a step you take and see (1/1 becomes 2/2).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shop
