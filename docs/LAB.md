@@ -50,9 +50,6 @@ Egyetlen réteg sem javít meg mindent.
 
 ## Fontos tudnivalók
 
-**Ma nem kell kódot írnod, és fájlt sem kell szerkesztened.** Minden lépés egy
-kész fájl vagy egy parancs, amit innen másolsz.
-
 **Tesztfiókok** (minden adat kitalált):
 
 | E-mail | Jelszó | Szerep |

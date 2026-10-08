@@ -9,8 +9,7 @@ gateway, moves to Kubernetes, gets a service mesh with workload identity, and
 finally monitoring that shows a bot attack as a spike.
 
 If you are a participant, follow **[docs/LAB.md](docs/LAB.md)** (in
-Hungarian). It has every command and the output you should see. You never
-need to edit a file.
+Hungarian). It has every command and the output you should see.
 
 ## What the day looks like
 
