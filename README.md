@@ -4,15 +4,17 @@ Teaching repository for the **Mikroszolgáltatás architektúra** course,
 ELTE IK, DEDIH 2.0.
 
 A small fictional webshop, the Retro Game Shop, split into five services. In
-the morning every service is wide open. During the day it gets an API
+the morning every service is wide open. During the day the shop gets an API
 gateway, moves to Kubernetes, gets a service mesh with workload identity, and
 finally monitoring that shows a bot attack as a spike.
 
-Participants follow **[docs/LAB.md](docs/LAB.md)**, which is in Hungarian.
+If you are a participant, follow **[docs/LAB.md](docs/LAB.md)** (in
+Hungarian). It has every command and the output you should see. You never
+need to edit a file.
 
 ## What the day looks like
 
-| Attack | Stage A: Compose | Stage B: + Nginx gateway | Code fix (commented out) | Stage E: + Istio |
+| Attack | Open, no gateway | Behind the gateway | After the code fix | With Istio |
 | --- | --- | --- | --- | --- |
 | Read another customer's order (API1, BOLA) | works | works | refused | |
 | Order with `unit_price: 0` (API3) | works | works | refused | |
@@ -45,22 +47,25 @@ each service can be built and deployed on its own, which is the point.
 Every service answers `/health`, serves Swagger UI at `/docs` and under its
 prefix (`/api/catalog/docs`), and sets `X-Served-By: <hostname>`.
 
-The deliberate weaknesses are all in `services/orders/main.py`, each marked
-`# VULNERABLE (...)` with the fix commented out right under it. The sixth,
-`payments` trusting any caller, has no code fix on purpose.
+Five deliberate weaknesses are in `services/orders/main.py`. Each is marked
+`# VULNERABLE (...)` with a `# FIX: ...` line under it. For four of them the
+fixed code is already there, commented out: remove the `#` in front of those
+lines and rebuild `orders`. The API9 fix is deleting the endpoint. The sixth
+weakness, `payments` trusting any caller, has no code fix on purpose: Istio
+stops it in block 4.
 
 Test accounts: `alice@example.com` / `alice123`, `bob@example.com` / `bob123`,
 `admin@example.com` / `admin123`. All data is made up.
 
-## Stages
+## How the shop runs, block by block
 
-| Stage | Block | Command |
+| Block | What runs | Command |
 | --- | --- | --- |
-| A | 1 | `docker compose up -d --build` |
-| B | 2 | `docker compose down` then `docker compose -f compose.nginx.yaml up -d --build` |
-| C (optional demo) | 2 | uncomment a fix in `services/orders/main.py`, then `docker compose -f compose.nginx.yaml up -d --build orders` |
-| D | 3 | `docker compose down` then `scripts/cluster-up.sh` |
-| E | 4, 5 | `scripts/mesh-up.sh`, then the files in `mesh/` one by one |
+| 1 | Open version: Compose, no gateway, every service on its own port | `docker compose up -d --build` |
+| 2 | Behind the gateway: Compose, only Nginx on 8080 | `docker compose down`, then `docker compose -f compose.nginx.yaml up -d --build` |
+| 2, optional demo | After the code fix | remove the `#` from a fix in `services/orders/main.py`, then `docker compose -f compose.nginx.yaml up -d --build orders` |
+| 3 | Kubernetes (kind), still behind the gateway | `docker compose down`, then `scripts/cluster-up.sh` |
+| 4 and 5 | Kubernetes with Istio and monitoring | `scripts/mesh-up.sh`, then the files in `mesh/` one by one |
 
 ## Layout
 
@@ -68,10 +73,10 @@ Test accounts: `alice@example.com` / `alice123`, `bob@example.com` / `bob123`,
 .devcontainer/     Codespace definition: Docker in Docker, kubectl, kind, istioctl, jq
 services/          catalog, orders, payments, invoicing, einvoice-mock (FastAPI)
 web/               the shop UI, Astro, multi-stage Dockerfile
-nginx/             proxy.conf (stage A, routing only), gateway.conf (stage B onwards)
+nginx/             proxy.conf (open version, routing only), gateway.conf (from block 2 on)
 db/init.sql        one database and one user per service
-compose.yaml       stage A, every service on its own port too
-compose.nginx.yaml stage B, only Nginx on 8080
+compose.yaml       open version (block 1), every service on its own port too
+compose.nginx.yaml behind the gateway (block 2), only Nginx on 8080
 kind/              one node, host port 8080 mapped to the Nginx NodePort
 k8s/               namespace shop, one Deployment, Service and ServiceAccount per service
 mesh/              Istio install, 01-strict-mtls.yaml, 02-payments-policy.yaml,
