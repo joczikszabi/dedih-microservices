@@ -98,8 +98,8 @@ istioctl version --remote=false
 ```
 
 > Ha valamelyik parancsot nem találja, akkor a container létrehozásakor futó
-> szkript hibára futott. A javítás: `F1` billentyű, majd
-> **Codespaces: Rebuild Container**. A `postCreateCommand` ugyanis csak a
+> szkript hibára futott. A javítás: nyisd meg a Command Palette-et
+> (`Ctrl+Shift+P`, Macen `Cmd+Shift+P`), majd **Codespaces: Rebuild Container**. A `postCreateCommand` ugyanis csak a
 > container létrehozásakor fut le, újraindításkor nem.
 
 ---
@@ -769,7 +769,7 @@ A Codespace törlése: a forkodon **Code** gomb, **Codespaces** fül, a három p
 ## 7. Hibaelhárítás
 
 **Valamelyik parancsot (`kind`, `istioctl`, `jq`) nem találja a terminál.**
-`F1`, majd **Codespaces: Rebuild Container**.
+Command Palette (`Ctrl+Shift+P`, Macen `Cmd+Shift+P`), majd **Codespaces: Rebuild Container**.
 
 **`port is already allocated`, vagy a `cluster-up.sh` szerint foglalt a 8080.**
 Még fut a Compose. Add ki a `docker compose down` parancsot, és próbáld újra.
