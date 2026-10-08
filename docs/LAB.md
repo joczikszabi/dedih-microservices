@@ -116,8 +116,8 @@ Az első indítás két-három perc, mert minden image-et meg kell építeni.
 docker compose ps
 ```
 
-Kilenc konténert látsz: öt service, a `web`, az `einvoice-mock`, a `postgres`
-és az `nginx`.
+Nyolc konténert látsz: a négy backend service (`catalog`, `orders`, `payments`,
+`invoicing`), az `einvoice-mock`, a `web`, a `postgres` és az `nginx`.
 
 ### 1.2 Használd a shopot
 
