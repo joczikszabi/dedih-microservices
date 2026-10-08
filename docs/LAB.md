@@ -66,8 +66,7 @@ működik:
 scripts/reset-demo.sh
 ```
 
-**A nap végén töröld a Codespace-t.** Ennek a lépéseit a Takarítás részben
-találod.
+**A nap végén töröld a Codespace-t.** A lépéseket a 6. fejezetben találod.
 
 ---
 
@@ -754,7 +753,7 @@ A második terminálban állítsd le a forgalmat: `Ctrl+C`.
 
 ---
 
-## 6. Takarítás
+## 6. A nap végén: leállítás és törlés
 
 ```bash
 pkill -f "kubectl port-forward"
