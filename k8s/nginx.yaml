@@ -1,6 +1,6 @@
 # nginx: the gateway, the only way in from outside.
 #
-# Same nginx/gateway.conf as stage B in Compose, here as a ConfigMap
+# The same nginx/gateway.conf as compose.nginx.yaml uses, here as a ConfigMap
 # ("nginx-gateway", created from the file by scripts/cluster-up.sh).
 # Nginx finds the services by name (web, catalog, orders), exactly as in
 # Compose: the Kubernetes Service names are the same.

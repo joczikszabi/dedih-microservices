@@ -3,8 +3,8 @@
 # The bot. Logs in as bob and tries to buy the limited console, as fast as it
 # can, over and over.
 #
-#   scripts/bot.sh          30 attempts (block 1 and block 2)
-#   scripts/bot.sh 3000     a longer run, for the graphs in block 5
+#   scripts/bot.sh          30 attempts (block 2, without and with the gateway)
+#   scripts/bot.sh 6000     about a minute of traffic, for the graphs in block 5
 #
 # It prints the HTTP status of every attempt:
 #   200  order placed        409  sold out

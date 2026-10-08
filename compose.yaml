@@ -1,4 +1,4 @@
-# Stage A, block 1: the shop as five services, every one of them reachable.
+# Block 1: the open version of the shop, without a gateway.
 #
 #   docker compose up -d --build
 #

@@ -42,7 +42,8 @@ async def served_by(request: Request, call_next):
     return response
 
 
-# Swagger UI on /docs (direct port, stage A) and under the prefix (through Nginx).
+# Swagger UI on /docs (the service's own port, open version) and under the
+# prefix (through Nginx).
 @app.get("/docs", include_in_schema=False)
 @app.get(PREFIX + "/docs", include_in_schema=False)
 def docs():

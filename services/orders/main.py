@@ -1,8 +1,10 @@
 """orders: customers, login, checkout, order history, refunds.
 
-This service contains the deliberate weaknesses of the course. Each one is
-marked `# VULNERABLE (...)`, and the fix sits commented out right under it.
-To demonstrate a fix: uncomment the lines under `# FIX`, then rebuild orders.
+This service contains five deliberate weaknesses. Each one is marked
+`# VULNERABLE (...)`, with a `# FIX: ...` line right under it. For four of
+them the fixed code is already there, commented out: remove the `#` in front
+of those lines, then rebuild orders. The fifth (API9) is fixed by deleting
+the endpoint.
 """
 
 import os
@@ -28,7 +30,7 @@ CATALOG_URL = os.environ.get("CATALOG_URL", "http://catalog:8000")
 PAYMENTS_URL = os.environ.get("PAYMENTS_URL", "http://payments:8000")
 INVOICING_URL = os.environ.get("INVOICING_URL", "http://invoicing:8000")
 
-# The handheld console with 20 units. Used by the fix for weakness 4.
+# The handheld console with 20 units. Used by the API4 and API6 fix below.
 LIMITED_PRODUCT_ID = 1
 
 
@@ -177,10 +179,9 @@ def my_orders(customer: Customer = Depends(current_customer)):
         return [order_out(o) for o in orders]
 
 
-# VULNERABLE (API9 improper inventory): the old v1 endpoint is still deployed.
-# It has no authentication at all and lists anyone's orders, address included.
-# FIX: delete this whole function. Nobody uses it any more, which is exactly
-# why nobody noticed it is still there.
+# VULNERABLE (API9 improper inventory management): the old v1 endpoint is
+# still deployed, has no authentication and lists anyone's orders.
+# FIX: delete this whole function. There is nothing to uncomment here.
 @app.get(PREFIX + "/v1/orders")
 def v1_list_orders(customer_id: int):
     with Session(engine) as session:
@@ -228,9 +229,9 @@ def checkout(body: Checkout, background: BackgroundTasks,
     if not body.items:
         raise HTTPException(400, "Cart is empty")
 
-    # VULNERABLE (API4/API6 unrestricted business flow): nothing limits how
-    # many limited consoles one customer buys, so a bot can buy all 20.
-    # FIX: one limited console per customer. Uncomment the block below.
+    # VULNERABLE (API4 and API6 unrestricted business flow): nothing limits
+    # how many limited consoles one customer buys, so a bot can buy all 20.
+    # FIX: one limited console per customer. Uncomment the six lines below.
     # with Session(engine) as session:
     #     already = session.scalar(select(OrderItem).join(Order).where(
     #         Order.customer_id == customer.id, OrderItem.product_id == LIMITED_PRODUCT_ID))

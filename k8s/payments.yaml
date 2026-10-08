@@ -49,7 +49,7 @@ spec:
                   key: PAYMENTS_DATABASE_URL
           # On shutdown, keep serving for 5 more seconds while Kubernetes
           # takes this pod out of the Service. Without it a rolling update
-          # drops the odd request (we saw exactly one 502 in testing).
+          # can drop a request.
           lifecycle:
             preStop:
               exec:

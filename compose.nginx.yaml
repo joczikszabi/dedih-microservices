@@ -1,4 +1,4 @@
-# Stage B, block 2: the same shop behind an API gateway.
+# Block 2: the same shop behind the Nginx API gateway.
 #
 #   docker compose down
 #   docker compose -f compose.nginx.yaml up -d --build
