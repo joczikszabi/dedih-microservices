@@ -1,0 +1,42 @@
+{
+  "name": "DEDIH Microservices",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  // Istio, Prometheus, Grafana and Kiali next to the shop need more than the
+  // default 2 core machine. Measured: the whole cluster uses about 3 GB.
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [8080, 8001, 8002, 8003, 8004, 3000, 20001, 9090],
+  "portsAttributes": {
+    "8080": { "label": "Shop", "onAutoForward": "notify" },
+    "8001": { "label": "catalog", "onAutoForward": "silent" },
+    "8002": { "label": "orders", "onAutoForward": "silent" },
+    "8003": { "label": "payments", "onAutoForward": "silent" },
+    "8004": { "label": "invoicing", "onAutoForward": "silent" },
+    "3000": { "label": "Grafana", "onAutoForward": "silent" },
+    "20001": { "label": "Kiali", "onAutoForward": "silent" },
+    "9090": { "label": "Prometheus", "onAutoForward": "silent" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-python.python"
+      ],
+      "settings": {
+        "redhat.telemetry.enabled": false
+      }
+    }
+  }
+}
