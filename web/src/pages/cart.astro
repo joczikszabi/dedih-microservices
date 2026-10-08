@@ -1,0 +1,54 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Cart">
+  <h1>Cart</h1>
+  <div id="cart"></div>
+  <div id="message"></div>
+  <script type="module" is:inline>
+    import { api, huf, cart, saveCart, token, esc } from "/shop.js";
+
+    function render() {
+      const items = cart();
+      const box = document.getElementById("cart");
+      if (!items.length) {
+        box.innerHTML = "<p>Your cart is empty.</p>";
+        return;
+      }
+      const total = items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0);
+      box.innerHTML = `
+        <table>
+          <tr><th>Product</th><th>Quantity</th><th>Unit price</th></tr>
+          ${items.map((i) => `<tr><td>${esc(i.name)}</td><td>${i.quantity}</td><td>${huf(i.unit_price)}</td></tr>`).join("")}
+          <tr><th>Total</th><th></th><th>${huf(total)}</th></tr>
+        </table>
+        <p><button id="checkout">Place order</button> <button id="empty">Empty cart</button></p>`;
+      document.getElementById("empty").onclick = () => { saveCart([]); render(); };
+      document.getElementById("checkout").onclick = checkout;
+    }
+
+    async function checkout() {
+      const message = document.getElementById("message");
+      if (!token()) {
+        message.innerHTML = '<div class="message error">Please <a href="/login/">log in</a> first.</div>';
+        return;
+      }
+      // Note: the browser sends the unit price it was shown. Whether orders
+      // trusts that number is weakness 2 of the course.
+      const { ok, body } = await api("/api/orders/", {
+        method: "POST",
+        body: JSON.stringify({ items: cart() }),
+      });
+      if (ok) {
+        saveCart([]);
+        render();
+        message.innerHTML = `<div class="message success">Order #${body.id} placed, ${huf(body.total_huf)}. <a href="/orders/">See my orders</a></div>`;
+      } else {
+        message.innerHTML = '<div class="message error"></div>';
+        message.firstChild.textContent = "Order failed: " + (body.detail || "unknown error");
+      }
+    }
+
+    render();
+  </script>
+</Layout>

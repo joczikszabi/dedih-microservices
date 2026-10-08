@@ -1,0 +1,58 @@
+---
+// The frame around every page: header, navigation, status line.
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | Retro Game Shop</title>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">Retro Game Shop</a>
+      <nav>
+        <a href="/">Products</a>
+        <a href="/cart/">Cart <span id="cart-count"></span></a>
+        <a href="/orders/">My orders</a>
+      </nav>
+      <span id="who"></span>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <span id="served-by">catalog served by ...</span>
+      <span>Fictional shop for a training course. Nothing is sold, nothing is charged.</span>
+    </footer>
+    <script type="module" is:inline>
+      import { updateHeader } from "/shop.js";
+      updateHeader();
+    </script>
+    <style is:global>
+      body { font-family: system-ui, sans-serif; margin: 0; color: #1d1d1f; background: #f6f4ef; }
+      header { display: flex; gap: 1.5rem; align-items: center; padding: .8rem 1.5rem; background: #2b2d42; color: #fff; flex-wrap: wrap; }
+      header a { color: #fff; text-decoration: none; }
+      header nav { display: flex; gap: 1rem; flex: 1; }
+      .brand { font-weight: 700; font-size: 1.2rem; }
+      main { max-width: 960px; margin: 1.5rem auto; padding: 0 1rem; }
+      footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; max-width: 960px; margin: 2rem auto; padding: 0 1rem; font-size: .85rem; color: #666; }
+      #served-by { font-family: ui-monospace, monospace; background: #e8e4da; padding: .2rem .5rem; border-radius: 4px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+      .card { background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+      .card h3 { margin: 0 0 .4rem; font-size: 1rem; }
+      .card a { color: inherit; }
+      .limited { color: #b3261e; font-weight: 600; font-size: .85rem; }
+      .price { font-weight: 700; }
+      button { background: #ef8354; color: #fff; border: 0; border-radius: 6px; padding: .5rem 1rem; cursor: pointer; font: inherit; }
+      button:disabled { background: #bbb; cursor: default; }
+      table { width: 100%; border-collapse: collapse; background: #fff; }
+      td, th { padding: .5rem; border-bottom: 1px solid #eee; text-align: left; }
+      input { font: inherit; padding: .4rem; width: 100%; box-sizing: border-box; margin-bottom: .6rem; }
+      .message { padding: .6rem 1rem; border-radius: 6px; background: #fff; margin: 1rem 0; }
+      .error { background: #fde7e4; }
+      .success { background: #e3f4e1; }
+    </style>
+  </body>
+</html>

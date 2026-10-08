@@ -1,0 +1,29 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="My orders">
+  <h1>My orders</h1>
+  <div id="orders">Loading...</div>
+  <script type="module" is:inline>
+    import { api, huf, token, esc } from "/shop.js";
+
+    const box = document.getElementById("orders");
+    if (!token()) {
+      box.innerHTML = 'Please <a href="/login/">log in</a> first.';
+    } else {
+      const { ok, body } = await api("/api/orders/");
+      if (!ok) {
+        box.textContent = "Could not load orders: " + (body.detail || "error");
+      } else if (!body.length) {
+        box.textContent = "No orders yet.";
+      } else {
+        box.innerHTML = `<table>
+          <tr><th>#</th><th>Items</th><th>Total</th><th>Status</th><th>Deliver to</th></tr>
+          ${body.map((o) => `<tr><td>${o.id}</td>
+            <td>${o.items.map((i) => i.quantity + " x " + esc(i.name)).join("<br>")}</td>
+            <td>${huf(o.total_huf)}</td><td>${esc(o.status)}</td><td>${esc(o.delivery_address)}</td></tr>`).join("")}
+        </table>`;
+      }
+    }
+  </script>
+</Layout>

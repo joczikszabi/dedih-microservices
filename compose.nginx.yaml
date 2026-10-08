@@ -1,0 +1,92 @@
+# Stage B, block 2: the same shop behind an API gateway.
+#
+#   docker compose down
+#   docker compose -f compose.nginx.yaml up -d --build
+#
+# A complete file of its own, not an override. Compare it with compose.yaml:
+#   - no service publishes a port any more, only Nginx on 8080
+#   - Nginx uses nginx/gateway.conf: token check, rate limit, admin routes,
+#     retired /v1 endpoint blocked, internal services not routed at all
+# The application code is exactly the same. BOLA and the price bug are still
+# there: a gateway cannot fix business logic.
+
+services:
+  nginx:
+    image: nginx:1.30-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/gateway.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      web: { condition: service_started }
+      # restart: true makes Compose restart Nginx when catalog or orders is
+      # rebuilt. Nginx looks up their addresses once, at start.
+      catalog: { condition: service_healthy, restart: true }
+      orders: { condition: service_healthy, restart: true }
+
+  web:
+    build: ./web
+    image: retro-shop/web:v1
+
+  catalog:
+    build: ./services/catalog
+    image: retro-shop/catalog:v1
+    environment:
+      DATABASE_URL: postgresql+psycopg://catalog:catalogpw@postgres:5432/catalog
+    healthcheck: &health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  orders:
+    build: ./services/orders
+    image: retro-shop/orders:v1
+    environment:
+      DATABASE_URL: postgresql+psycopg://orders:orderspw@postgres:5432/orders
+      JWT_SECRET: lab-only-secret-change-me-0123456789abcdef
+      CATALOG_URL: http://catalog:8000
+      PAYMENTS_URL: http://payments:8000
+      INVOICING_URL: http://invoicing:8000
+    healthcheck: *health
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  payments:
+    build: ./services/payments
+    image: retro-shop/payments:v1
+    environment:
+      DATABASE_URL: postgresql+psycopg://payments:paymentspw@postgres:5432/payments
+    healthcheck: *health
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  invoicing:
+    build: ./services/invoicing
+    image: retro-shop/invoicing:v1
+    environment:
+      DATABASE_URL: postgresql+psycopg://invoicing:invoicingpw@postgres:5432/invoicing
+      EINVOICE_URL: http://einvoice-mock:8000
+    healthcheck: *health
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  einvoice-mock:
+    build: ./services/einvoice-mock
+    image: retro-shop/einvoice-mock:v1
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: postgrespw
+    volumes:
+      # Creates one database and one user per service, see db/init.sql.
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    # No volume for the data, so `docker compose down` takes it with it.

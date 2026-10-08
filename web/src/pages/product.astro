@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Product">
+  <div id="product" class="card">Loading...</div>
+  <div id="message"></div>
+  <script type="module" is:inline>
+    import { api, huf, addToCart } from "/shop.js";
+
+    const id = new URLSearchParams(location.search).get("id");
+    const { status, body: p } = await api("/api/catalog/products/" + id);
+    const box = document.getElementById("product");
+    if (status !== 200) {
+      box.textContent = "Product not found.";
+    } else {
+      box.innerHTML = `
+        <h1></h1>
+        ${p.limited ? '<div class="limited">Limited edition: only 20 units were made</div>' : ""}
+        <p class="description"></p>
+        <p class="price">${huf(p.price_huf)}</p>
+        <p>${p.stock > 0 ? p.stock + " in stock" : "Sold out"}</p>
+        <button id="add" ${p.stock > 0 ? "" : "disabled"}>Add to cart</button>`;
+      box.querySelector("h1").textContent = p.name;
+      box.querySelector(".description").textContent = p.description;
+      document.getElementById("add").onclick = () => {
+        addToCart(p);
+        document.getElementById("message").innerHTML =
+          '<div class="message success">Added. <a href="/cart/">Go to cart</a></div>';
+      };
+    }
+  </script>
+</Layout>

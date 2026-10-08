@@ -1,0 +1,12 @@
+{
+  "name": "retro-game-shop-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  },
+  "dependencies": {
+    "astro": "7.3.7"
+  }
+}

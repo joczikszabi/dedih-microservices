@@ -1,0 +1,25 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Products">
+  <h1>Products</h1>
+  <div id="products" class="grid">Loading...</div>
+  <script type="module" is:inline>
+    import { api, huf } from "/shop.js";
+
+    const { body } = await api("/api/catalog/products");
+    const grid = document.getElementById("products");
+    grid.innerHTML = "";
+    for (const p of body) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3><a href="/product/?id=${p.id}"></a></h3>
+        ${p.limited ? '<div class="limited">Limited edition</div>' : ""}
+        <div class="price">${huf(p.price_huf)}</div>
+        <div>${p.stock > 0 ? p.stock + " in stock" : "Sold out"}</div>`;
+      card.querySelector("a").textContent = p.name;
+      grid.appendChild(card);
+    }
+  </script>
+</Layout>
