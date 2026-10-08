@@ -121,8 +121,12 @@ a Codespace itself.
   succeeds right after `kubectl apply`, wait and run it again.
 - The services' startup waits for Postgres. Startup probes keep liveness from
   restarting a pod that is only waiting (seen once in a devcontainer run).
+- The Compose files have no healthchecks. Each service retries the database
+  connection for up to three minutes on startup and has `restart: on-failure`.
+  Right after `docker compose up` the shop answers 502 for about five seconds
+  (measured: first 200 after 4 to 5 s).
 - Nginx resolves service names once, at start. If a rebuilt Compose service
-  ever gives 502, `docker compose restart nginx`.
+  keeps giving 502, `docker compose restart nginx`.
 - The rate limit is per token, not per IP: in a Codespace every request comes
   from the same address.
 - Every container image, Python package and tool version was checked to exist

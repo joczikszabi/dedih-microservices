@@ -122,6 +122,10 @@ docker compose ps
 Nyolc konténert látsz: a négy backend service (`catalog`, `orders`, `payments`,
 `invoicing`), az `einvoice-mock`, a `web`, a `postgres` és az `nginx`.
 
+Az indítás után a service-eknek még kb. öt másodperc kell, amíg csatlakoznak
+az adatbázishoz. Ha addig `502 Bad Gateway` jön, várj egy kicsit, és próbáld
+újra.
+
 Ez a shop **nyitott változata**: van előtte egy Nginx, de az csak továbbítja a
 kéréseket, semmit nem ellenőriz.
 
@@ -785,7 +789,11 @@ nélkül, és nézd meg, mit kaptál.
 **Minden kérésre `401` jön.** Új terminálban nincs `TOKEN` változó. Ismételd
 meg a 2.1-es belépést.
 
-**`502 Bad Gateway` Compose alatt, miután újraépítettünk egy service-t.**
+**`502 Bad Gateway` közvetlenül a `docker compose up` után.**
+A service-ek még az adatbázisra várnak. Várj néhány másodpercet, és próbáld
+újra.
+
+**`502 Bad Gateway` Compose alatt, és fél perc múlva sem múlik el.**
 `docker compose -f compose.nginx.yaml restart nginx`.
 
 **A 8080-as porton nem válaszol semmi, közvetlenül a cluster létrehozása után.**
