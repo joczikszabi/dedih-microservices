@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# The bot. Logs in as bob and tries to buy the limited console, as fast as it
+# A bot logs in as bob and tries to buy the limited console, as fast as it
 # can, over and over.
 #
 #   scripts/bot.sh          30 attempts (block 2, without and with the gateway)
